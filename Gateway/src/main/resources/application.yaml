@@ -1,0 +1,70 @@
+springfox:
+  documentation:
+    swagger-ui:
+      base-url: /documentation
+
+zipking:
+  endpoint: http://localhost:9411/api/v2/spans
+
+debug: false
+
+server:
+  port: 8087
+
+
+provider:
+  paymentService:
+    name: paymentService
+---
+spring:
+  profiles: nacos
+  application:
+    name: apigateway
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        register-enabled: true
+        port: 8848
+    sentinel:
+      transport:
+        port: 8721
+        dashboard: localhost:8989
+      # 设置Sentinel Nacos数据源配置
+      datasource:
+        #其中flow是数据源名，可以自行随意修改
+        flow:
+          nacos:
+            server-addr: 127.0.0.1:8848
+            data-id: ${spring.application.name}-flow-rules
+            groupId: DEFAULT_GROUP
+            # 规则类型，取值见：
+            # org.springframework.cloud.alibaba.sentinel.datasource.RuleType
+            # 配置后报错提示：Type 'com.alibaba.cloud.sentinel.datasource.config.NacosDataSourceProperties' has no property 'rule-type' ， 以为哪里配置错了或版本不对， 最后发现忽略即可， 项目可正常启动
+            rule-type: flow
+
+  zipkin:
+    base-url: http://localhost:9411
+    enabled: true
+    message-timeout: 5
+    sender:
+      type: web
+  sleuth:
+    sampler:
+      rate: 1
+
+
+dubbo:
+  registry:
+    address: spring-cloud://localhost:8848
+    #address: nacos://127.0.0.1:8848
+
+    simplified: true
+  metadata-report:
+    address: nacos://127.0.0.1:8848
+  cloud:
+    subscribed-services: ${provider.paymentService.name}
+  consumer:
+    check: false
