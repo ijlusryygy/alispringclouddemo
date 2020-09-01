@@ -13,4 +13,8 @@
     <name>openapi</name>
     <description>openapi- Payment</description>
 
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+
+    </build>
 </project>
